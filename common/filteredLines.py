@@ -18,7 +18,7 @@ HORIZONTAL = 0
 VERTICAL = 1
 
 DIST = 10
-DIRECTION = HORIZONTAL
+DIRECTION = VERTICAL
 
 lineChunks = []
 positions = []
