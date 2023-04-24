@@ -9,10 +9,10 @@ Some shape filtering are processed with Numpy.
 Matplotlib is used to analysis the results.
 
 ### First tests show the following results
-![localImage](https://github.com/Thomas7997/linedetection/tree/main/doc/results/first.png)
+![localImage](https://github.com/Thomas7997/linedetection/blob/main/doc/results/first.png?raw=true)
     
 ### Results with some filtering (horizontal)
-![localImage](https://github.com/Thomas7997/linedetection/tree/main/doc/results/horizontal.png)
+![localImage](https://github.com/Thomas7997/linedetection/blob/main/doc/results/horizontal.png?raw=true)
 
 ### Results with some filtering (vertical)
-![localImage](https://github.com/Thomas7997/linedetection/tree/main/doc/results/vertical.png)
+![localImage](https://github.com/Thomas7997/linedetection/blob/main/doc/results/vertical.png?raw=true)
