@@ -1,8 +1,9 @@
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
+from lib import test
 
-img = cv2.imread('../samples/lines.png')
+img = cv2.imread('../samples/routes.jpg')
 
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -18,7 +19,7 @@ HORIZONTAL = 0
 VERTICAL = 1
 
 DIST = 10
-DIRECTION = HORIZONTAL
+DIRECTION = VERTICAL
 
 lineChunks = []
 positions = []
@@ -42,12 +43,14 @@ for contour in contours:
 	# Detecting lines as rectangles
 	if len(approx) == 4:
 		positions.append([x,y])
-		lineChunks.append(approx)
+		# Keeping the largest line chunks
+		newApprox = approx[np.absolute(approx[0][0][DIRECTION]-approx[1][0][DIRECTION]) > DIST] # Depends on the chosen direction
+		if (len(newApprox)>0) :
+			lineChunks.append(newApprox)
+			# Drawing the contour (red)
+			cv2.drawContours(img, [contour], 0, (0, 0, 255), 5)
 
-		# Drawing the contour (red)
-		cv2.drawContours(img, [contour], 0, (0, 0, 255), 5)
-
-cv2.imshow('shapes', img)
+test.writeResult(img, 1)
 
 # Displaying the positions
 
@@ -56,10 +59,5 @@ n = len(positions)
 if n > 20 :
 	n = n // 10
 
-print(f"n : {n}")
-
 print(f"Positions : {positions[:n]}")
-print(f"Line chunks : {lineChunks}")
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+print(f"Line chunks ({len(lineChunks)}) : {lineChunks}")

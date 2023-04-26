@@ -1,2 +1,4 @@
 samples/*
 logs/*
+results/*
+__pycache__/

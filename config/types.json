@@ -1,0 +1,12 @@
+{
+    "names" : {
+        "LINES" : 0,
+        "FILTERED_LINES" : 1,
+        "LONG_LINES" : 2
+    },
+    "values" : [
+        "lines",
+        "filtered_lines",
+        "long_lines"
+    ]
+}
