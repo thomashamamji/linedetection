@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from lib import test
 import os
-
+import lib.serial as serial
 i = 0
 
 # Setting operations for any type of line detection
@@ -64,3 +64,7 @@ if n > 20 :
 
 print(f"Positions : {positions[:n]}")
 print(f"Line chunks ({len(lineChunks)}) : {lineChunks}")
+
+serial.add(lineChunks)
+r = serial.get()
+print(f"Last record : {r}")
