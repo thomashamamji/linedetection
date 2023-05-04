@@ -4,6 +4,8 @@ from matplotlib import pyplot as plt
 from lib import test
 import os
 import lib.serial as serial
+import nearest
+
 i = 0
 
 # Setting operations for any type of line detection
@@ -13,14 +15,17 @@ VERTICAL = 1
 DIST = 10
 DIRECTION = VERTICAL
 
-lineChunks = []
+allLineChunks = []
 positions = []
 
 images = os.listdir("../samples")
 
 for image in images :
+	contours = []
 	img = cv2.imread(f'../samples/{image}')
 	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+	lineChunks = []
 
 	# Setting threshold of gray image
 	_, threshold = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
@@ -51,8 +56,13 @@ for image in images :
 			if (len(newApprox)>0) :
 				lineChunks.append(newApprox)
 				# Drawing the contour (red)
+				print(f"Contour : {contour}")
 				cv2.drawContours(img, [contour], 0, (0, 0, 255), 5)
+				contours.append(contour)
+	
+	allLineChunks.append(lineChunks)
 
+	nearest.drawNearest(img, contours)
 	test.writeResult(img, 1)
 
 # Displaying the positions

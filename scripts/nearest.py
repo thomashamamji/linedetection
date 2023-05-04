@@ -1,13 +1,20 @@
 import numpy as np
 import lib.serial as ser
+import os
 import cv2
 
 X = 0
 Y = 1
 
+def mIndex (l, element) :
+    idx = -1
+    for index, row in enumerate(l) :
+        if element in row :
+            idx = index
+    return idx
+
 def findNearest (lines) :
     bottomCorners = []
-    nearestLine = lines[0].min(0)
 
     distancesList = []
     rectangleSizeList = []
@@ -39,11 +46,12 @@ def findNearest (lines) :
             'distances' : distances.tolist(),
             'size' : recSize,
             'length' : recLength,
+            'line' : np.array(newLine),
             'bottom' : {
                 'height' : bottomLineHeight
             }
         }
-        
+
         distancesList.append(distances)
         rectangles.append(rec)
 
@@ -53,20 +61,41 @@ def findNearest (lines) :
     print(f"Rectangle size list : {rectangleSizeList}")
 
     bottomCorners = np.array(bottomCorners)
-
-    print(f"Bottom corners : {bottomCorners}")
-
-    # nearestLine = bottomCorners.min(1)
-
+    
+    # Sorting
     rectangles.sort(key=lambda x: x['size'], reverse=True)
     rectangles.sort(key=lambda x: x['bottom']['height'][Y], reverse=False)
-    print(f"Rectangles : {rectangles}")
+ 
+    rectangleBottoms = [rec['bottom'] for rec in rectangles]
+    print(f"Rectangles : {rectangleBottoms}")
     nearestLine = None
+ 
+    # Getting the first element of the sorted list
     if len(rectangles) > 0 :
         nearestLine = rectangles[0]
-    print(f"Nearest line : {nearestLine}")
+    print(f"Nearest line : {nearestLine['bottom']}")
 
-linesList = ser.get()
-print(f"Lines {linesList}")
+    return (nearestLine, mIndex(lines, nearestLine['line']))
 
-findNearest(linesList)
+def drawLineContours (img, line) :
+    print(f"Drawing line {line} ...")
+    cv2.drawContours(img, [line], 0, (0, 255, 0), 5)
+
+def drawNearest (img, contours) :
+    nl, nContour = findNearest(linesList)
+    print(f"nContour : {nContour}")
+    drawLineContours(img, nl['line'])
+
+# Function calls
+
+images = os.listdir("../samples")
+
+for image in images :
+    img = cv2.imread(f'../samples/{image}')
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    linesList = ser.get()
+    print(f"Lines {linesList}")
+
+    # Finding nearest line's element and index
+    nl, idx = findNearest(linesList)
+    print(f"Nearest line : {nl}\nIndex : {idx}")
