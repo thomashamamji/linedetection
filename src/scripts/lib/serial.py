@@ -20,7 +20,7 @@ def countFiles (baseDir) :
 
 def resolveLineData () :
     baseFolder = os.path.abspath(os.getcwd())
-    return f"{baseFolder}/../data/lines"
+    return f"{baseFolder}/../../data/lines"
 
 def get () :
     # Deserialization

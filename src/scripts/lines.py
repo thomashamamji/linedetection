@@ -11,11 +11,11 @@ VERTICAL = 1
 DIST = 10
 DIRECTION = HORIZONTAL
 
-images = os.listdir("../samples")
+images = os.listdir("../../samples")
 
 for image in images :
 	print(f"Reading image '{image}'")
-	img = cv2.imread(f'../samples/{image}')
+	img = cv2.imread(f'../../samples/{image}')
 	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 	# Setting threshold of gray image
