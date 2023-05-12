@@ -1,67 +1,38 @@
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
-from lib import test
-import os
+import sys
 
-# Setting operations for any type of line detection
-HORIZONTAL = 0
-VERTICAL = 1
+logPath = "../../logs/lines.log"
 
-DIST = 10
-DIRECTION = HORIZONTAL
+sys.path.insert(1, logPath)
+from lib.logger import LOG
+internal = LOG(logPath)
 
-images = os.listdir("../../samples")
+def detecter_line(image):
+    # Convertir l'image en niveaux de grey
+    grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    vague = cv2.GaussianBlur(grey, (5, 5), 0)
 
-for image in images :
-	print(f"Reading image '{image}'")
-	img = cv2.imread(f'../../samples/{image}')
-	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # Appliquer la détection de contours de Canny
+    contours = cv2.Canny(vague, 50, 150)
 
-	# Setting threshold of gray image
-	_, threshold = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+    # Trouver les lines à l'aide de la transformation de Hough
+    lines = cv2.HoughLinesP(contours, 1, np.pi / 180, 100, minLineLength=100, maxLineGap=10)
 
-	contours, _ = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    # Dessiner les lines détectées sur l'image originale
+    if lines is not None:
+        internal.log(f"New lines detected !")
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
+            internal.log(f"[({x1},{x2},{y1},{y2})]")
+            cv2.line(image, (x1, y1), (x2, y2), (0, 255, 0), 3)
 
-	i = 0
+    # Afficher l'image avec les lines détectées
+    cv2.imshow("Line detection", image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
-	lineChunks = []
-	positions = []
+# Function calls
 
-	for contour in contours:
-		if i == 0:
-			i = 1
-			continue
-
-		approx = cv2.approxPolyDP(contour, 0.01 * cv2.arcLength(contour, True), True)
-
-		# Positions
-		x = -1
-		y = -1
-
-		M = cv2.moments(contour)
-		if M['m00'] != 0.0:
-			x = int(M['m10']/M['m00'])
-			y = int(M['m01']/M['m00'])
-
-		# Detecting lines as rectangles
-		if len(approx) == 4:
-			positions.append([x,y])
-			lineChunks.append(approx)
-
-			# Drawing the contour (red)
-			cv2.drawContours(img, [contour], 0, (0, 0, 255), 5)
-
-	test.writeResult(img, 0)
-
-# Displaying the positions
-
-n = len(positions)
-
-if n > 20 :
-	n = n // 10
-
-print(f"n : {n}")
-
-print(f"Positions : {positions[:n]}")
-print(f"Line chunks : {lineChunks}")
+image = cv2.imread("../../samples/5.jpg")
+detecter_line(image)
