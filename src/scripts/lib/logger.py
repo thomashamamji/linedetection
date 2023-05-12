@@ -37,8 +37,9 @@ class LOG:
                     f"\n---- Script start ---- on '{self.destinationPath}'\n")
             filenameIndex = __file__.rindex('/')
             filename = __file__[filenameIndex+1:]
-            logstr = f"{d} | [{filename}] | ({self.index})       {message}\n"
-            f.write(logstr)
+            newMessage = message.replace('\n', ' | ')
+            logstr = f"{d} | [{filename}] | ({self.index})       {newMessage}\n"
+            print(logstr, file=f, end='')
             self.index += 1
         else:
             print("No log destination set yet.")
