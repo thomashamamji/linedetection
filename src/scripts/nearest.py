@@ -1,13 +1,20 @@
 import numpy as np
-import lib.serial as ser
-import os
-import cv2
 import sys
+import json
 
-logPath = "../../logs/nearest.log"
+# For relative filenames
+from pathlib import Path
+source_path = Path(__file__).resolve()
+basefolder = source_path.parent
+
+# Loads the config
+cfgFile = open(f"{basefolder}/../../config/types.json", 'r')
+typesOpt = json.load(cfgFile)
+
+logPath = f"{basefolder}/../../logs/nearest.log"
 
 sys.path.insert(1, logPath)
-from lib.logger import LOG
+from .lib.logger import LOG
 internal = LOG(logPath)
 internal.log("Starting the nearest line script ...")
 
@@ -21,7 +28,8 @@ def mIndex (l, element) :
             idx = index
     return idx
 
-def findNearest (dim, lines) :
+# Finds the nearest line based on a criteria
+def findNearest (dim, lines, cr) :
     h, w = dim
     bottomCorners = []
     newLines = []
@@ -39,28 +47,45 @@ def findNearest (dim, lines) :
         bottomCorners.append(bottomLine) # positions of : [ left, right ]
 
         # Distance to the center
-        # Problem here
-        dx = x2 - (w//2)
-        dy = y2 - (h//2)
-        distanceX = np.absolute(dx)
-        distanceY = np.absolute(dy)
+        dx = -1
+        cx = w // 2
+
+        if x1 >= cx :
+            dx = x1-cx
+        else :
+            dx = cx-x1
+
+        if dx < 0 :
+            internal.log(f"Got a negative dx : {dx}")
         
+        distanceX = np.absolute(dx)
+
+        # Length calculus
+        ly = np.maximum(y1,y2) - np.minimum(y1,y2)
+        lx = np.maximum(x1, x2) - np.minimum(x1, x2)
+        l = lx
+        onY = ly >= lx
+        if onY :
+            l = ly
+
+        # Adding the values
         newLines.append({
             'id' : idx,
             'position' : newLine,
             'distanceX' : distanceX,
-            'distanceY' : distanceY
+            'distanceY' : np.maximum(y1,y2),
+            'length' : l,
+            'onY' : onY
         })
     
+    filters = typesOpt['filters']
     # Sorting
-    newLines.sort(key=lambda x : x['distanceY'], reverse=False) # The nearest from the bottom
-    # newLines.sort(key=lambda x : x['distanceX'], reverse=True) # The nearest from the center
-
-    nearestLine = None
- 
-    # Getting the first element of the sorted list
-    if len(newLines) > 0 :
-        nearestLine = newLines[0]
+    if cr == filters['LENGTH'] :
+        newLines.sort(key=lambda x : x['length'], reverse=True) # The nearest from the bottom
+    if cr == filters['FORWARD'] :
+        newLines.sort(key=lambda x : x['distanceX'], reverse=False) # The nearest from the center
+    if cr == filters['BOTTOM'] :
+        newLines.sort(key=lambda x : x['distanceY'], reverse=False) # The nearest from the bottom (fails)
     
     # Logging the results
     internal.log(f"New lines ({h, w}) : {newLines}")

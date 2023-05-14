@@ -8,5 +8,10 @@
         "lines",
         "filtered_lines",
         "long_lines"
-    ]
+    ],
+    "filters" : {
+        "LENGTH" : 0,
+        "FORWARD" : 1,
+        "BOTTOM" : 2
+    }
 }

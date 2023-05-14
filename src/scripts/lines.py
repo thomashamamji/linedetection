@@ -1,22 +1,30 @@
 import cv2
 import numpy as np
 import sys
-from lib import test
-import nearest
-import os
+from . import nearest
+from .lib import test, logger
+import json
 
-logPath = "../../logs/lines.log"
+# For relative filenames
+from pathlib import Path
+source_path = Path(__file__).resolve()
+basefolder = source_path.parent
+
+# Loads the config
+cfgFile = open(f"{basefolder}/../../config/types.json", 'r')
+typesOpt = json.load(cfgFile)
+
+logPath = f"{basefolder}/../../logs/lines.log"
 
 sys.path.insert(1, logPath)
-from lib.logger import LOG
-internal = LOG(logPath)
+internal = logger.LOG(logPath)
 
 def diminuer_luminosite(image, gamma):
     inv_gamma = 1.0 / gamma
     table = np.array([((i / 255.0) ** inv_gamma) * 255 for i in np.arange(0, 256)]).astype("uint8")
     return cv2.LUT(image, table)
 
-def detect_line(img):
+def detect_line(img, filterType):
     # Get the size
     h, w, c = img.shape
 
@@ -33,27 +41,23 @@ def detect_line(img):
 
     # Draw the lines
     if lines is not None:
-        internal.log(f"New lines detected !")
         for line in lines:
             x1, y1, x2, y2 = line[0]
-            internal.log(f"[({x1},{x2},{y1},{y2})]")
+            internal.log(f"[{x1},{x2},{y1},{y2}]")
             cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
 
-    nls = nearest.findNearest((h,w), lines)
-    internal.log(f"Lines with distances : {nls}")
+        nls = nearest.findNearest((h,w), lines, filterType)
+        nNls = len(nls)
+        nls2 = list(nls)
+        nls2.sort(key=lambda x : x['id'],reverse=False)
+        internal.log(f"New lines detected ({nNls}) : {nls2}")
 
-    if len(nls) > 6 :
-        for _ in range(3) :
-            nl = nls[_]
-            nlps = nl['position']
-            cv2.line(img, nlps[0:2], nlps[2:], (0, 0, 255), 3)
+        if len(nls) > 1 :
+            for _ in range(1) :
+                nl = nls[_]
+                nlps = nl['position']
+                internal.log(f"Red drawing line {nl['id']} ...")
+                cv2.line(img, nlps[0:2], nlps[2:], (0, 0, 255), 3)
 
-    # Store the result
-    test.writeResult(img, 0)
-
-# Function calls
-
-images = os.listdir("../../samples")
-images = [cv2.imread(f'../../samples/{image}') for image in images]
-for image in images :
-    detect_line(image)
+        # Store the result
+        test.writeResult(img, 0)
