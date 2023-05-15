@@ -4,11 +4,11 @@ I need to develop an algorithm for a drone line tracking school project.
 The goal of this part of the project is to detect the nearest and biggest line of a photo.  
 
 ## How will it be implemented ?
-OpenCV is used to detect rectangle shapes of a photo.  
+OpenCV is used to detect line shapes of a photo.  
 Some shape filtering are processed with Numpy.  
 Matplotlib is used to analyse the results.  
 
-# Example of a some line detection results  
+# Example of a line detection
 ## Without filtering  
 ![1](https://github.com/Thomas7997/linedetection/assets/45339466/bea02402-fcaf-4c34-b0e3-fa52dd0eab67)
 
