@@ -5,6 +5,10 @@ from . import nearest
 from .lib import test, logger
 import json
 
+# Some basic parameters
+MIN_Y_POSITION = 500
+MIN_Y_RATE = 0.3
+
 # For relative filenames
 from pathlib import Path
 source_path = Path(__file__).resolve()
@@ -19,7 +23,7 @@ logPath = f"{basefolder}/../../logs/lines.log"
 sys.path.insert(1, logPath)
 internal = logger.LOG(logPath)
 
-def diminuer_luminosite(image, gamma):
+def lowerLuminosity(image, gamma):
     inv_gamma = 1.0 / gamma
     table = np.array([((i / 255.0) ** inv_gamma) * 255 for i in np.arange(0, 256)]).astype("uint8")
     return cv2.LUT(image, table)
@@ -28,8 +32,10 @@ def detect_line(img, filterType):
     # Get the size
     h, w, c = img.shape
 
+    internal.log(f"Height : {h}\nWeight : {w}")
+
     # Convert the image
-    lum = diminuer_luminosite(img, 0.45)
+    lum = lowerLuminosity(img, 0.45)
     grey = cv2.cvtColor(lum, cv2.COLOR_BGR2GRAY)
     vague = cv2.GaussianBlur(grey, (5, 5), 0)
 
@@ -43,7 +49,7 @@ def detect_line(img, filterType):
     if lines is not None:
         for line in lines:
             x1, y1, x2, y2 = line[0]
-            internal.log(f"[{x1},{x2},{y1},{y2}]")
+            internal.log(f"[{x1},{y1},{x2},{y2}]")
             cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
 
         nls = nearest.findNearest((h,w), lines, filterType)
@@ -52,12 +58,21 @@ def detect_line(img, filterType):
         nls2.sort(key=lambda x : x['id'],reverse=False)
         internal.log(f"New lines detected ({nNls}) : {nls2}")
 
+        height = np.maximum(h, w)
+        internal.log(f"The real height is {height}")
+
         if len(nls) > 1 :
             for _ in range(1) :
                 nl = nls[_]
                 nlps = nl['position']
+                x1, y1, x2, y2 = nlps
+                minY = np.minimum(y1,y2)
+                rate = 1-(minY / height)
+                internal.log(f"Rate : {rate}\nY : {minY}")
                 internal.log(f"Red drawing line {nl['id']} ...")
-                cv2.line(img, nlps[0:2], nlps[2:], (0, 0, 255), 3)
+                pt1 = nlps[0:2]
+                pt2 = nlps[2:]
+                cv2.line(img, pt1, pt2, (0, 0, 255), 3)
 
         # Store the result
         test.writeResult(img, 0)
