@@ -23,3 +23,10 @@ The distance calculus is focused on the Y axis.
 
 The result of the FORWARD filter is likely to be a short and straight line.  
 This filter is based on the comparison of the line ends' positions on the X axis to be sure the line is not too oriented.  
+
+## How to use ?
+```bash
+  pip install -r requirements.txt
+  bash init.sh
+  python3 detection.py
+```
