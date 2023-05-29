@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 import json
+import math
 
 # For relative filenames
 from pathlib import Path
@@ -48,6 +49,7 @@ def findNearest (dim, lines, cr) :
 
         # Distance to the center
         dx = -1
+        dy = -1
         cx = w // 2
 
         if x1 >= cx :
@@ -61,8 +63,24 @@ def findNearest (dim, lines, cr) :
         distanceX = np.absolute(dx)
 
         # Length calculus
-        ly = np.maximum(y1,y2) - np.minimum(y1,y2)
-        lx = np.maximum(x1, x2) - np.minimum(x1, x2)
+        ymax = np.maximum(y1, y2)
+        xmax = np.maximum(x1, x2)
+        ymin = np.minimum(y1, y2)
+        xmin = np.minimum(x1, x2)
+
+        ly = ymax - ymin
+        lx = xmax - xmin
+
+        # Points to reach
+        yStart = h-ymax
+        yEnd = h-ymax+l
+        dy = yEnd-yStart
+
+        # The angle calculus
+        cos = xmax/ymax
+        # theta = math.acos(cos)
+
+        # Maybe not necessary
         l = lx
         onY = ly >= lx
         if onY :
@@ -73,7 +91,10 @@ def findNearest (dim, lines, cr) :
             'id' : idx,
             'position' : newLine,
             'distanceX' : distanceX,
-            'distanceY' : np.maximum(y1,y2),
+            'yStart' : h-ymax,
+            'yEnd' : h-ymax+l,
+            'angle' : -1,
+            'cos' : cos,
             'length' : l,
             'onY' : onY
         })
@@ -88,6 +109,6 @@ def findNearest (dim, lines, cr) :
         newLines.sort(key=lambda x : x['distanceY'], reverse=False) # The nearest from the bottom (fails)
     
     # Logging the results
-    internal.log(f"New lines ({h, w}) : {newLines}")
+    internal.log(f"New lines (W:{w},H:{h}) : {newLines}")
 
     return newLines

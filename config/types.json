@@ -9,6 +9,11 @@
         "filtered_lines",
         "long_lines"
     ],
+    "criterias" : {
+        "MIN_LENGTH" : 150,
+        "MIN_ANGLE" : 1,
+        "MAX_CENTER_DISTANCE" : 100
+    },
     "filters" : {
         "LENGTH" : 0,
         "FORWARD" : 1,
