@@ -18,11 +18,6 @@ basefolder = source_path.parent
 cfgFile = open(f"{basefolder}/../../config/types.json", 'r')
 typesOpt = json.load(cfgFile)
 
-logPath = f"{basefolder}/../../logs/lines.log"
-
-sys.path.insert(1, logPath)
-internal = logger.LOG(logPath)
-
 def lowerLuminosity(image, gamma):
     inv_gamma = 1.0 / gamma
     table = np.array([((i / 255.0) ** inv_gamma) * 255 for i in np.arange(0, 256)]).astype("uint8")
@@ -31,8 +26,6 @@ def lowerLuminosity(image, gamma):
 def detect_line(img, filterType):
     # Get the size
     h, w, c = img.shape
-
-    internal.log(f"Height : {h}\nWeight : {w}")
 
     # Convert the image
     lum = lowerLuminosity(img, 0.45)
@@ -49,30 +42,20 @@ def detect_line(img, filterType):
     if lines is not None:
         for line in lines:
             x1, y1, x2, y2 = line[0]
-            internal.log(f"[{x1},{y1},{x2},{y2}]")
             cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
 
         nls = nearest.findNearest((h,w), lines, filterType)
-        nNls = len(nls)
         nls2 = list(nls)
         nls2.sort(key=lambda x : x['id'],reverse=False)
-        internal.log(f"New lines detected ({nNls}) : {nls2}")
-
-        height = np.maximum(h, w)
-        internal.log(f"The real height is {height}")
 
         if len(nls) > 1 :
             for _ in range(1) :
                 nl = nls[_]
                 nlps = nl['position']
                 x1, y1, x2, y2 = nlps
-                minY = np.minimum(y1,y2)
-                rate = 1-(minY / height)
-                internal.log(f"Rate : {rate}\nY : {minY}")
-                internal.log(f"Red drawing line {nl['id']} ...")
                 pt1 = nlps[0:2]
                 pt2 = nlps[2:]
                 cv2.line(img, pt1, pt2, (0, 0, 255), 3)
 
         # Store the result
-        test.writeResult(img, 0)
+        return img

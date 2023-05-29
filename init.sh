@@ -1,1 +1,1 @@
-mkdir samples results logs
+mkdir samples results results/lines results/filtered_lines results/long_lines

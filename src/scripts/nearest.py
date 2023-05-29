@@ -1,5 +1,4 @@
 import numpy as np
-import sys
 import json
 
 # For relative filenames
@@ -10,13 +9,6 @@ basefolder = source_path.parent
 # Loads the config
 cfgFile = open(f"{basefolder}/../../config/types.json", 'r')
 typesOpt = json.load(cfgFile)
-
-logPath = f"{basefolder}/../../logs/nearest.log"
-
-sys.path.insert(1, logPath)
-from .lib.logger import LOG
-internal = LOG(logPath)
-internal.log("Starting the nearest line script ...")
 
 X = 0
 Y = 1
@@ -31,7 +23,6 @@ def mIndex (l, element) :
 # Finds the nearest line based on a criteria
 def findNearest (dim, lines, cr) :
     h, w = dim
-    bottomCorners = []
     newLines = []
 
     for idx, l in enumerate(lines) :
@@ -41,11 +32,6 @@ def findNearest (dim, lines, cr) :
         newLine = [nl[0] for nl in newLine]
         x1, y1, x2, y2 = newLine
 
-        internal.log(f"4 points : {newLine}")
-
-        bottomLine = [(x1,y1), (x2,y2)]
-        bottomCorners.append(bottomLine) # positions of : [ left, right ]
-
         # Distance to the center
         dx = -1
         cx = w // 2
@@ -54,9 +40,6 @@ def findNearest (dim, lines, cr) :
             dx = x1-cx
         else :
             dx = cx-x1
-
-        if dx < 0 :
-            internal.log(f"Got a negative dx : {dx}")
         
         distanceX = np.absolute(dx)
 
@@ -86,8 +69,5 @@ def findNearest (dim, lines, cr) :
         newLines.sort(key=lambda x : x['distanceX'], reverse=False) # The nearest from the center
     if cr == filters['BOTTOM'] :
         newLines.sort(key=lambda x : x['distanceY'], reverse=False) # The nearest from the bottom (fails)
-    
-    # Logging the results
-    internal.log(f"New lines ({h, w}) : {newLines}")
 
     return newLines

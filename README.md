@@ -8,6 +8,12 @@ OpenCV is used to detect line shapes of a photo.
 Some shape filtering are processed with Numpy.  
 Matplotlib is used to analyse the results.  
 
+## How to use ?
+```bash
+  pip install -r requirements.txt
+  bash init.sh
+  python3 detection.py
+```
 # Example of a line detection
 ## Without filtering  
 ![1](https://github.com/Thomas7997/linedetection/assets/45339466/bea02402-fcaf-4c34-b0e3-fa52dd0eab67)
@@ -23,10 +29,3 @@ The distance calculus is focused on the Y axis.
 
 The result of the FORWARD filter is likely to be a short and straight line.  
 This filter is based on the comparison of the line ends' positions on the X axis to be sure the line is not too oriented.  
-
-## How to use ?
-```bash
-  pip install -r requirements.txt
-  bash init.sh
-  python3 detection.py
-```
