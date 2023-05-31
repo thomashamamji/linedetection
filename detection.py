@@ -13,6 +13,7 @@ def main():
     prePath = "./samples"
     images = os.listdir(prePath)
     images = [cv2.imread(f'{prePath}/{image}') for image in images]
+    images = [images[1]]
 
     # Loads the config
     cfgFile = open(f"{basefolder}/config/types.json", 'r')

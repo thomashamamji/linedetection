@@ -32,11 +32,11 @@ def mIndex (l, element) :
 # Finds the nearest line based on a criteria
 def findNearest (dim, lines, cr) :
     h, w = dim
-    bottomCorners = []
     newLines = []
 
     for idx, l in enumerate(lines) :
         newLine = []
+        # This loop must disappear
         for i, _ in enumerate(l[0]) :
             newLine.append([_])
         newLine = [nl[0] for nl in newLine]
@@ -44,23 +44,21 @@ def findNearest (dim, lines, cr) :
 
         internal.log(f"4 points : {newLine}")
 
-        bottomLine = [(x1,y1), (x2,y2)]
-        bottomCorners.append(bottomLine) # positions of : [ left, right ]
-
         # Distance to the center
         dx = -1
-        dy = -1
         cx = w // 2
 
+        dir = 1
         if x1 >= cx :
             dx = x1-cx
+            dir = -1
         else :
             dx = cx-x1
 
         if dx < 0 :
             internal.log(f"Got a negative dx : {dx}")
         
-        distanceX = np.absolute(dx)
+        horizontalDistance = np.absolute(dx)
 
         # Length calculus
         ymax = np.maximum(y1, y2)
@@ -77,7 +75,7 @@ def findNearest (dim, lines, cr) :
         dy = yEnd-yStart
 
         # The angle calculus
-        cos = xmax/ymax
+        cos = xmax / ymax
         # theta = math.acos(cos)
 
         # Maybe not necessary
@@ -86,17 +84,19 @@ def findNearest (dim, lines, cr) :
         if onY :
             l = ly
 
+        verticalDistance = h-ymax
+
         # Adding the values
         newLines.append({
             'id' : idx,
-            'position' : newLine,
-            'distanceX' : distanceX,
-            'yStart' : h-ymax,
-            'yEnd' : h-ymax+l,
-            'angle' : -1,
-            'cos' : cos,
+            'xDist' : horizontalDistance,
             'length' : l,
-            'onY' : onY
+            'position' : newLine,
+            'moves' : {
+                'firstVerticalDistance' : verticalDistance,
+                'verticalDestination' : verticalDistance+l,
+                'horizontalMove' : dir * horizontalDistance
+            }
         })
     
     filters = typesOpt['filters']
@@ -104,7 +104,7 @@ def findNearest (dim, lines, cr) :
     if cr == filters['LENGTH'] :
         newLines.sort(key=lambda x : x['length'], reverse=True) # The nearest from the bottom
     if cr == filters['FORWARD'] :
-        newLines.sort(key=lambda x : x['distanceX'], reverse=False) # The nearest from the center
+        newLines.sort(key=lambda x : x['xDist'], reverse=False) # The nearest from the center
     if cr == filters['BOTTOM'] :
         newLines.sort(key=lambda x : x['distanceY'], reverse=False) # The nearest from the bottom (fails)
     
