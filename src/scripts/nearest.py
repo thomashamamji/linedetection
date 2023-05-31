@@ -34,9 +34,11 @@ def findNearest (dim, lines, cr) :
     h, w = dim
     newLines = []
 
+    criterias = typesOpt['criterias']
+
     for idx, l in enumerate(lines) :
         newLine = []
-        # This loop must disappear
+
         for i, _ in enumerate(l[0]) :
             newLine.append([_])
         newLine = [nl[0] for nl in newLine]
@@ -86,18 +88,20 @@ def findNearest (dim, lines, cr) :
 
         verticalDistance = h-ymax
 
-        # Adding the values
-        newLines.append({
-            'id' : idx,
-            'xDist' : horizontalDistance,
-            'length' : l,
-            'position' : newLine,
-            'moves' : {
-                'firstVerticalDistance' : verticalDistance,
-                'verticalDestination' : verticalDistance+l,
-                'horizontalMove' : dir * horizontalDistance
-            }
-        })
+        # Criterias are important to skip the incorrect lines
+        if (l >= criterias['MIN_LENGTH'] and horizontalDistance <= criterias['MAX_CENTER_DISTANCE'] and verticalDistance < criterias['MAX_VERTICAL_POSITION']) :
+            # Adding the values
+            newLines.append({
+                'id' : idx,
+                'xDist' : horizontalDistance,
+                'length' : l,
+                'position' : newLine,
+                'moves' : {
+                    'firstVerticalDistance' : verticalDistance,
+                    'verticalDestination' : verticalDistance+l,
+                    'horizontalMove' : dir * horizontalDistance
+                }
+            })
     
     filters = typesOpt['filters']
     # Sorting

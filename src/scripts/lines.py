@@ -61,18 +61,14 @@ def detect_line(img, filterType):
         height = np.maximum(h, w)
         internal.log(f"The real height is {height}")
 
-        if len(nls) > 1 :
-            for _ in range(1) :
-                nl = nls[_]
-                nlps = nl['position']
-                x1, y1, x2, y2 = nlps
-                minY = np.minimum(y1,y2)
-                rate = 1-(minY / height)
-                internal.log(f"Rate : {rate}\nY : {minY}")
-                internal.log(f"Red drawing line {nl['id']} ...")
-                pt1 = nlps[0:2]
-                pt2 = nlps[2:]
-                cv2.line(img, pt1, pt2, (0, 0, 255), 3)
+        # Selecting the line to follow
+        nl = nls[0]
+        nlps = nl['position']
+        x1, y1, x2, y2 = nlps
+        internal.log(f"Red drawing line {nl['id']} ...")
+        pt1 = nlps[0:2]
+        pt2 = nlps[2:]
+        cv2.line(img, pt1, pt2, (0, 0, 255), 3)
 
         # Store the result
         test.writeResult(img, 0)
