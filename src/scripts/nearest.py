@@ -53,9 +53,9 @@ def findNearest (dim, lines, cr) :
         dir = 1
         if x1 >= cx :
             dx = x1-cx
-            dir = -1
         else :
             dx = cx-x1
+            dir = -1
 
         if dx < 0 :
             internal.log(f"Got a negative dx : {dx}")
