@@ -38,6 +38,8 @@ def detect_line(img, filterType):
     # Detect the lines
     lines = cv2.HoughLinesP(contours, 1, np.pi / 180, 100, minLineLength=100, maxLineGap=10)
 
+    finalLine = None
+
     # Draw the lines
     if lines is not None:
         for line in lines:
@@ -48,7 +50,6 @@ def detect_line(img, filterType):
         nls2 = list(nls)
         nls2.sort(key=lambda x : x['id'],reverse=False)
 
-        finalLine = None
         if len(nls) > 0 :
             nl = nls[0]
             finalLine = nl
@@ -58,5 +59,5 @@ def detect_line(img, filterType):
             pt2 = nlps[2:]
             cv2.line(img, pt1, pt2, (0, 0, 255), 3)
 
-        # Store the result
-        return (img, finalLine)
+    # Store the result
+    return (img, finalLine)
