@@ -1,18 +1,32 @@
 # Line detection
-## Why do I need this ?
-I need to develop an algorithm for a drone line tracking school project.
-The goal of this part of the project is to detect the nearest and biggest line of a photo.
+## Why do I need this ?  
+I need to develop an algorithm for a drone line tracking school project.  
+The goal of this part of the project is to detect the nearest and biggest line of a photo.  
 
 ## How will it be implemented ?
-OpenCV is used to detect rectangle shapes of a photo.
-Some shape filtering are processed with Numpy.
-Matplotlib is used to analysis the results.
+OpenCV is used to detect line shapes of a photo.  
+Some shape filtering are processed with Numpy.  
+Matplotlib is used to analyse the results.  
 
-### First tests show the following results
-![localImage](https://github.com/Thomas7997/linedetection/blob/main/doc/results/first.png?raw=true)
-    
-### Results with some filtering (horizontal)
-![localImage](https://github.com/Thomas7997/linedetection/blob/main/doc/results/horizontal.png?raw=true)
+# Example of a line detection
+## Without filtering  
+![1](https://github.com/Thomas7997/linedetection/assets/45339466/bea02402-fcaf-4c34-b0e3-fa52dd0eab67)
 
-### Results with some filtering (vertical)
-![localImage](https://github.com/Thomas7997/linedetection/blob/main/doc/results/vertical.png?raw=true)
+## After applying the LENGTH filter  
+![325](https://github.com/Thomas7997/linedetection/assets/45339466/4eb8e5e5-a76b-4d17-8525-68c21775fe69)
+
+The LENGTH filter is simply based on the distance between the lines' ends.  
+The distance calculus is focused on the Y axis.  
+
+## After applying the FORWARD filter  
+![319](https://github.com/Thomas7997/linedetection/assets/45339466/930d1927-8eef-448b-8703-e5b4723b4080)
+
+The result of the FORWARD filter is likely to be a short and straight line.  
+This filter is based on the comparison of the line ends' positions on the X axis to be sure the line is not too oriented.  
+
+## How to use ?
+```bash
+  pip install -r requirements.txt
+  bash init.sh
+  python3 detection.py
+```

@@ -1,13 +1,21 @@
 import numpy as np
-import lib.serial as ser
-import os
-import cv2
 import sys
+import json
+import math
 
-logPath = "../../log/nearest.log"
+# For relative filenames
+from pathlib import Path
+source_path = Path(__file__).resolve()
+basefolder = source_path.parent
+
+# Loads the config
+cfgFile = open(f"{basefolder}/../../config/types.json", 'r')
+typesOpt = json.load(cfgFile)
+
+logPath = f"{basefolder}/../../logs/nearest.log"
 
 sys.path.insert(1, logPath)
-from lib.logger import LOG
+from .lib.logger import LOG
 internal = LOG(logPath)
 internal.log("Starting the nearest line script ...")
 
@@ -21,109 +29,90 @@ def mIndex (l, element) :
             idx = index
     return idx
 
-def findNearest (lines) :
-    bottomCorners = []
-    topCorners = []
-    lineDistances = []
+# Finds the nearest line based on a criteria
+def findNearest (dim, lines, cr) :
+    h, w = dim
+    newLines = []
 
-    distancesList = []
-    rectangleSizeList = []
-    rectangles = []
+    criterias = typesOpt['criterias']
 
-    for l in lines :
+    for idx, l in enumerate(lines) :
         newLine = []
+
         for i, _ in enumerate(l[0]) :
             newLine.append([_])
-        bl, tl, tr, br = newLine
-
-        newTopCorner = [ tl, tr ]
-        newBottomCorner = [ bl, br ]
-
-        internal.log(f"Adding new top corner : {newTopCorner}")
-        internal.log(f"Adding new bottom corner : {newBottomCorner}")
-
-        topCorners.append(newTopCorner)
-        bottomCorners.append(newBottomCorner)
-
-        # Calculating the distance
-        newDistance = tr[0][0][Y] - br[0][0][Y]
-        internal.log(f"Adding new distance {newDistance}")
-        lineDistances.append(newDistance) # The minimum between the two top and bottom corners can be taken as the value to take to calculate the distance
+        newLine = [nl[0] for nl in newLine]
+        x1, y1, x2, y2 = newLine
 
         internal.log(f"4 points : {newLine}")
-        internal.log(f"Bottom line : {bl}, {br}")
 
-        # Filtering
-        distances = [np.absolute(newLine[0][0][0]-newLine[idx][0][0]) for idx in range(1, 4)] # Calculating the distances
-        distances = np.array(distances)
+        # Distance to the center
+        dx = -1
+        cx = w // 2
 
-        recSize = distances.sum()
-        rectangleSizeList.append(recSize) # Sum of the distances of the matrix
+        dir = 1
+        if x1 >= cx :
+            dx = x1-cx
+        else :
+            dx = cx-x1
+            dir = -1
 
-        recLength = newDistance
-        bl = np.array(bl)
-        bl = bl.tolist()
-        br = np.array(br)
-        br = br.tolist()
-        bottomLineHeight = [bl[0][0], br[0][0]]
+        if dx < 0 :
+            internal.log(f"Got a negative dx : {dx}")
+        
+        horizontalDistance = np.absolute(dx)
 
-        rec = {
-            'distances' : distances.tolist(), # All distances
-            'size' : recSize, # Perimeter of the rectangle
-            'length' : recLength,
-            'position' : np.array(newLine),
-            'bottom' : bottomLineHeight # Position of the two bottom corners of the rectangle
-        }
+        # Length calculus
+        ymax = np.maximum(y1, y2)
+        xmax = np.maximum(x1, x2)
+        ymin = np.minimum(y1, y2)
+        xmin = np.minimum(x1, x2)
 
-        distancesList.append(distances)
-        rectangles.append(rec)
+        ly = ymax - ymin
+        lx = xmax - xmin
 
-    distancesList = np.array(distancesList)
-    internal.log(f"Distances matrix : {distancesList}")
-    internal.log(f"Rectangle size list : {rectangleSizeList}")
+        # Points to reach
+        yStart = h-ymax
+        yEnd = h-ymax+l
+        dy = yEnd-yStart
 
-    bottomCorners = np.array(bottomCorners)
+        # The angle calculus
+        cos = xmax / ymax
+        # theta = math.acos(cos)
+
+        # Maybe not necessary
+        l = lx
+        onY = ly >= lx
+        if onY :
+            l = ly
+
+        verticalDistance = h-ymax
+
+        # Criterias are important to skip the incorrect lines
+        if (l >= criterias['MIN_LENGTH'] and horizontalDistance <= criterias['MAX_CENTER_DISTANCE'] and verticalDistance < criterias['MAX_VERTICAL_POSITION']) :
+            # Adding the values
+            newLines.append({
+                'id' : idx,
+                'xDist' : horizontalDistance,
+                'length' : l,
+                'position' : newLine,
+                'moves' : {
+                    'firstVerticalDistance' : verticalDistance,
+                    'verticalDestination' : verticalDistance+l,
+                    'horizontalMove' : dir * horizontalDistance
+                }
+            })
     
+    filters = typesOpt['filters']
     # Sorting
-    rectangles.sort(key=lambda x: x['size'], reverse=True)
-    rectangles.sort(key=lambda x: x['bottom'][0][Y], reverse=False)
- 
-    bottomLines = [rec['bottom'] for rec in rectangles]
-    nearestLine = None
- 
-    # Getting the first element of the sorted list
-    if len(rectangles) > 0 :
-        nearestLine = rectangles[0]
+    if cr == filters['LENGTH'] :
+        newLines.sort(key=lambda x : x['length'], reverse=True) # The nearest from the bottom
+    if cr == filters['FORWARD'] :
+        newLines.sort(key=lambda x : x['xDist'], reverse=False) # The nearest from the center
+    if cr == filters['BOTTOM'] :
+        newLines.sort(key=lambda x : x['distanceY'], reverse=False) # The nearest from the bottom (fails)
     
     # Logging the results
-    internal.log(f"Bottom lines : {bottomLines}")
-    internal.log(f"Nearest line : {nearestLine['bottom']}")
-    internal.log(f"Distances : {lineDistances}")
-    internal.log(f"Rectangles : {rectangles}")
-    internal.log(f"Distances list : {distancesList}")
+    internal.log(f"New lines (W:{w},H:{h}) : {newLines}")
 
-    return (nearestLine, mIndex(lines, nearestLine.get('line')))
-
-def drawLineContours (img, line) :
-    internal.log(f"Drawing line {line} ...")
-    cv2.drawContours(img, [line], 0, (0, 255, 0), 5)
-
-def drawNearest (img, contours) :
-    nl, nContour = findNearest(linesList)
-    internal.log(f"nContour : {nContour}")
-    drawLineContours(img, nl['line'])
-
-# Function calls
-
-images = os.listdir("../../samples")
-
-for image in images :
-    img = cv2.imread(f'../../samples/{image}')
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    linesList = ser.get()
-    internal.log(f"Lines {linesList}")
-
-    # Finding nearest line's element and index
-    nl, idx = findNearest(linesList)
-    internal.log(f"Nearest line : {nl}")
-    internal.log(f"Index : {idx}")
+    return newLines

@@ -8,5 +8,16 @@
         "lines",
         "filtered_lines",
         "long_lines"
-    ]
+    ],
+    "criterias" : {
+        "MIN_LENGTH" : 250,
+        "MAX_VERTICAL_POSITION" : 200,
+        "MAX_CENTER_DISTANCE" : 150,
+        "MIN_ANGLE" : 1
+    },
+    "filters" : {
+        "LENGTH" : 0,
+        "FORWARD" : 1,
+        "BOTTOM" : 2
+    }
 }

@@ -43,15 +43,3 @@ class LOG:
             self.index += 1
         else:
             print("No log destination set yet.")
-
-
-"""
-
-import sys
-sys.path.insert(1,destPath)
-import logger
-from logger import LOG
-internal = new LOG(logPath)
-internal.log("Log message 1")
-
-"""

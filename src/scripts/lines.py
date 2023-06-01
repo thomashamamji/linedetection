@@ -1,67 +1,74 @@
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
-from lib import test
-import os
+import sys
+from . import nearest
+from .lib import test, logger
+import json
 
-# Setting operations for any type of line detection
-HORIZONTAL = 0
-VERTICAL = 1
+# Some basic parameters
+MIN_Y_POSITION = 500
+MIN_Y_RATE = 0.3
 
-DIST = 10
-DIRECTION = HORIZONTAL
+# For relative filenames
+from pathlib import Path
+source_path = Path(__file__).resolve()
+basefolder = source_path.parent
 
-images = os.listdir("../../samples")
+# Loads the config
+cfgFile = open(f"{basefolder}/../../config/types.json", 'r')
+typesOpt = json.load(cfgFile)
 
-for image in images :
-	print(f"Reading image '{image}'")
-	img = cv2.imread(f'../../samples/{image}')
-	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+logPath = f"{basefolder}/../../logs/lines.log"
 
-	# Setting threshold of gray image
-	_, threshold = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+sys.path.insert(1, logPath)
+internal = logger.LOG(logPath)
 
-	contours, _ = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+def lowerLuminosity(image, gamma):
+    inv_gamma = 1.0 / gamma
+    table = np.array([((i / 255.0) ** inv_gamma) * 255 for i in np.arange(0, 256)]).astype("uint8")
+    return cv2.LUT(image, table)
 
-	i = 0
+def detect_line(img, filterType):
+    # Get the size
+    h, w, c = img.shape
 
-	lineChunks = []
-	positions = []
+    internal.log(f"Height : {h}\nWeight : {w}")
 
-	for contour in contours:
-		if i == 0:
-			i = 1
-			continue
+    # Convert the image
+    lum = lowerLuminosity(img, 0.45)
+    grey = cv2.cvtColor(lum, cv2.COLOR_BGR2GRAY)
+    vague = cv2.GaussianBlur(grey, (5, 5), 0)
 
-		approx = cv2.approxPolyDP(contour, 0.01 * cv2.arcLength(contour, True), True)
+    # Apply Canny
+    contours = cv2.Canny(vague, 50, 150)
 
-		# Positions
-		x = -1
-		y = -1
+    # Detect the lines
+    lines = cv2.HoughLinesP(contours, 1, np.pi / 180, 100, minLineLength=100, maxLineGap=10)
 
-		M = cv2.moments(contour)
-		if M['m00'] != 0.0:
-			x = int(M['m10']/M['m00'])
-			y = int(M['m01']/M['m00'])
+    # Draw the lines
+    if lines is not None:
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
+            internal.log(f"[{x1},{y1},{x2},{y2}]")
+            cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
 
-		# Detecting lines as rectangles
-		if len(approx) == 4:
-			positions.append([x,y])
-			lineChunks.append(approx)
+        nls = nearest.findNearest((h,w), lines, filterType)
+        nNls = len(nls)
+        nls2 = list(nls)
+        nls2.sort(key=lambda x : x['id'],reverse=False)
+        internal.log(f"New lines detected ({nNls}) : {nls2}")
 
-			# Drawing the contour (red)
-			cv2.drawContours(img, [contour], 0, (0, 0, 255), 5)
+        height = np.maximum(h, w)
+        internal.log(f"The real height is {height}")
 
-	test.writeResult(img, 0)
+        # Selecting the line to follow
+        nl = nls[0]
+        nlps = nl['position']
+        x1, y1, x2, y2 = nlps
+        internal.log(f"Red drawing line {nl['id']} ...")
+        pt1 = nlps[0:2]
+        pt2 = nlps[2:]
+        cv2.line(img, pt1, pt2, (0, 0, 255), 3)
 
-# Displaying the positions
-
-n = len(positions)
-
-if n > 20 :
-	n = n // 10
-
-print(f"n : {n}")
-
-print(f"Positions : {positions[:n]}")
-print(f"Line chunks : {lineChunks}")
+        # Store the result
+        test.writeResult(img, 0)
