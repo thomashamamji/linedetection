@@ -48,14 +48,15 @@ def detect_line(img, filterType):
         nls2 = list(nls)
         nls2.sort(key=lambda x : x['id'],reverse=False)
 
-        if len(nls) > 1 :
-            for _ in range(1) :
-                nl = nls[_]
-                nlps = nl['position']
-                x1, y1, x2, y2 = nlps
-                pt1 = nlps[0:2]
-                pt2 = nlps[2:]
-                cv2.line(img, pt1, pt2, (0, 0, 255), 3)
+        finalLine = None
+        if len(nls) > 0 :
+            nl = nls[0]
+            finalLine = nl
+            nlps = nl['position']
+            x1, y1, x2, y2 = nlps
+            pt1 = nlps[0:2]
+            pt2 = nlps[2:]
+            cv2.line(img, pt1, pt2, (0, 0, 255), 3)
 
         # Store the result
-        return img
+        return (img, finalLine)

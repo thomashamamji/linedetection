@@ -19,7 +19,13 @@ def main():
     typesOpt = json.load(cfgFile)
 
     for image in images :
-        detect_line(image, typesOpt['filters']['FORWARD'])
+        r, line = detect_line(image, typesOpt['filters']['FORWARD'])
+        if line is not None :
+            print(f"Tracking line : {line}")
+            moves = line['moves']
+            mx = moves['horizontalMove']
+            my1 = moves['firstVerticalDistance']
+            my2 = moves['verticalDestination']
 
 if __name__ == "__main__":
     main()
