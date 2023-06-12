@@ -4,6 +4,7 @@ import sys
 from . import nearest
 from .lib import test, logger
 import json
+from .lib.convertDistances import convert
 
 # Some basic parameters
 MIN_Y_POSITION = 500
@@ -59,5 +60,13 @@ def detect_line(img, filterType):
             pt2 = nlps[2:]
             cv2.line(img, pt1, pt2, (0, 0, 255), 3)
 
-    # Store the result
-    return (img, finalLine)
+    if finalLine is not None :
+        moves = finalLine['moves']
+        mx = moves['horizontalMove']
+        my1 = moves['firstVerticalDistance']
+        my2 = moves['verticalDestination']
+
+        # Store the result
+        return (img, finalLine, (finalLine['xDirection']*convert(np.abs(mx), (w, 0)), 0, 0))
+    else :
+        return (img, finalLine, (0))

@@ -73,6 +73,7 @@ def findNearest (dim, lines, cr) :
             # Adding the values
             newLines.append({
                 'id' : idx,
+                'xDirection' : dir,
                 'xDist' : horizontalDistance,
                 'length' : l,
                 'position' : newLine,
