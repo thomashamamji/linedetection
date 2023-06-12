@@ -20,7 +20,7 @@ def lowerLuminosity(image, gamma):
     table = np.array([((i / 255.0) ** inv_gamma) * 255 for i in np.arange(0, 256)]).astype("uint8")
     return cv2.LUT(image, table)
 
-def detect_line(img, filterType):
+def detect_line(img, filterType, minLength):
     # Get the size
     h, w, c = img.shape
 
@@ -43,7 +43,7 @@ def detect_line(img, filterType):
             x1, y1, x2, y2 = line[0]
             cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
 
-        nls = nearest.findNearest((h,w), lines, filterType)
+        nls = nearest.findNearest((h,w), lines, filterType, minLength)
         nls2 = list(nls)
         nls2.sort(key=lambda x : x['id'],reverse=False)
 
@@ -63,6 +63,6 @@ def detect_line(img, filterType):
         my2 = moves['verticalDestination']
 
         # Store the result
-        return (img, finalLine, (finalLine['xDirection']*convert(np.abs(mx), (w, 0)), convert(my1), convert(my2)))
+        return (img, finalLine, (finalLine['xDirection']*convert(np.abs(mx), (w, 0)), convert(my1, (h, 1)), convert(my2, (h, 1))))
     else :
         return (img, finalLine, (0))

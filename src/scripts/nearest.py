@@ -23,7 +23,7 @@ def mIndex (l, element) :
     return idx
 
 # Finds the nearest line based on a criteria
-def findNearest (dim, lines, cr) :
+def findNearest (dim, lines, cr, minLength) :
     h, w = dim
     newLines = []
 
@@ -69,7 +69,7 @@ def findNearest (dim, lines, cr) :
         verticalDistance = h-ymax
 
         # Criterias are important to skip the incorrect lines
-        if (l <= criterias['MAX_LENGTH'] and l >= criterias['MIN_LENGTH'] and horizontalDistance <= criterias['MAX_CENTER_DISTANCE'] and verticalDistance < criterias['MAX_VERTICAL_POSITION']) :
+        if (l <= criterias['MAX_LENGTH'] and l >= minLength and horizontalDistance <= criterias['MAX_CENTER_DISTANCE'] and verticalDistance < criterias['MAX_VERTICAL_POSITION'] or (criterias['MIN_LENGTH'] != minLength and verticalDistance < criterias['MAX_VERTICAL_POSITION'])) :
             # Adding the values
             newLines.append({
                 'id' : idx,
