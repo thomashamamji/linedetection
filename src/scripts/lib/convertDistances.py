@@ -1,9 +1,18 @@
 import json
 from os import getcwd
 
-optPath = f"{getcwd()}/config/distances.json"
 
-with open(optPath, 'r') as optFile :
+# For relative filenames
+from pathlib import Path
+source_path = Path(__file__).resolve()
+basefolder = source_path.parent
+
+# Loads the config
+cfgFile = open(f"{basefolder}/../../config/distances.json", 'r')
+typesOpt = json.load(cfgFile)
+
+
+with open(f"{basefolder}/../../config/types.json", 'r') as optFile :
     distances = json.loads(optFile.read())
 
 X = 0
