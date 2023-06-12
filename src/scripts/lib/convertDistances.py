@@ -28,6 +28,14 @@ Y = 1
 
 # Based on the value in pixels of 20 cm
 
+def checkDist (dist) :
+    if dist < 10 :
+        return 0
+    elif dist < 20 :
+        return 20
+    else :
+        return dist
+    
 def convert(pixels, widget) :
     size, axis = widget
     if axis == X :
@@ -40,40 +48,31 @@ def convert(pixels, widget) :
                 if len(rates) == 2 :
                     if rates[0] != -1 and rates[1] == -1 and rate >= rates[0] :
                         val = int((20 / dist['distance']) * pixels)
-                        print(f"Val is {val}")
-                        if val < 10 :
-                            return 0
-                        elif val < 20 :
-                                return 20
-                        else :
-                            return val
+                        return checkDist(val)
+                    
                     elif rates[0] == -1 and rates[1] != -1 and rate <= rates[0] :
                         val = int((20 / dist['distance']) * pixels)
                         print(f"Val is {val}")
-                        if val < 10 :
-                            return 0
-                        elif val < 20 :
-                            return 20
-                        else :
-                            return val
+                        return checkDist(val)
+                    
                     elif rates[0] != -1 :
                         if rates[0] <= rate and rates[1] >= rate :
                             val = int((20 / dist['distance']) * pixels)
-                            print(f"Val is {val}")
-                            if val < 10 :
-                                return 0
-                            elif val < 20 :
-                                return 20
-                            else :
-                                return val
+                            return checkDist(val)
                     
     if axis == Y :
         if pixels <= 80 :
-            return pixels * 2
+            val = int((20 / (pixels * 2)) * pixels)
+            return checkDist(val)
+
         elif pixels >= 110 and pixels <= 130 :
-            return pixels - 30
+            val = int((20 / (pixels - 30)) * pixels)
+            return checkDist(val)
+        # Must be spliten into multiple distances
+        else :
+            return 30
     return 0
 
-def test (pixels, size) :
-    finalDistance = convert(pixels, (size, X))
-    print(f"Distance for {pixels} pixels is {finalDistance}")
+def test (pixels, widget) :
+    finalDistance = convert(pixels, widget)
+    print(f"Distance for {pixels} pixels is {finalDistance} cm")

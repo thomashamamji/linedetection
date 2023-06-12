@@ -69,7 +69,7 @@ def findNearest (dim, lines, cr) :
         verticalDistance = h-ymax
 
         # Criterias are important to skip the incorrect lines
-        if (l >= criterias['MIN_LENGTH'] and horizontalDistance <= criterias['MAX_CENTER_DISTANCE'] and verticalDistance < criterias['MAX_VERTICAL_POSITION']) :
+        if (l <= criterias['MAX_LENGTH'] and l >= criterias['MIN_LENGTH'] and horizontalDistance <= criterias['MAX_CENTER_DISTANCE'] and verticalDistance < criterias['MAX_VERTICAL_POSITION']) :
             # Adding the values
             newLines.append({
                 'id' : idx,

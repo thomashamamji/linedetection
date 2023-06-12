@@ -63,6 +63,6 @@ def detect_line(img, filterType):
         my2 = moves['verticalDestination']
 
         # Store the result
-        return (img, finalLine, (finalLine['xDirection']*convert(np.abs(mx), (w, 0)), 0, 0))
+        return (img, finalLine, (finalLine['xDirection']*convert(np.abs(mx), (w, 0)), convert(my1), convert(my2)))
     else :
         return (img, finalLine, (0))
