@@ -8,12 +8,12 @@ source_path = Path(__file__).resolve()
 basefolder = source_path.parent
 
 # Loads the config
-cfgFile = open(f"{basefolder}/../../config/distances.json", 'r')
-typesOpt = json.load(cfgFile)
+cfgFile = open(f"{basefolder}/../../../config/distances.json", 'r')
+distances = json.load(cfgFile)
 
 
-with open(f"{basefolder}/../../config/types.json", 'r') as optFile :
-    distances = json.loads(optFile.read())
+with open(f"{basefolder}/../../../config/types.json", 'r') as optFile :
+    typesOpt = json.loads(optFile.read())
 
 X = 0
 Y = 1
@@ -39,13 +39,33 @@ def convert(pixels, widget) :
                 # Required
                 if len(rates) == 2 :
                     if rates[0] != -1 and rates[1] == -1 and rate >= rates[0] :
-                        return (20 // dist['distance']) * pixels
+                        val = int((20 / dist['distance']) * pixels)
+                        print(f"Val is {val}")
+                        if val < 10 :
+                            return 0
+                        elif val < 20 :
+                                return 20
+                        else :
+                            return val
                     elif rates[0] == -1 and rates[1] != -1 and rate <= rates[0] :
-                        return (20 // dist['distance']) * pixels
+                        val = int((20 / dist['distance']) * pixels)
+                        print(f"Val is {val}")
+                        if val < 10 :
+                            return 0
+                        elif val < 20 :
+                            return 20
+                        else :
+                            return val
                     elif rates[0] != -1 :
-                        print("Correct rates !")
                         if rates[0] <= rate and rates[1] >= rate :
-                            return int((20 / dist['distance']) * pixels)
+                            val = int((20 / dist['distance']) * pixels)
+                            print(f"Val is {val}")
+                            if val < 10 :
+                                return 0
+                            elif val < 20 :
+                                return 20
+                            else :
+                                return val
                     
     if axis == Y :
         if pixels <= 80 :
