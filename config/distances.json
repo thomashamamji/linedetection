@@ -5,6 +5,14 @@
             "distance" : 65
         },
         {
+            "rate" : [0.35, 0.44],
+            "distance" : 70
+        },
+        {
+            "rate" : [0.66, 0.75],
+            "distance" : 70
+        },
+        {
             "rate" : [0.55, 0.65],
             "distance" : 60
         }
